@@ -24,7 +24,7 @@ import (
 type LBManager struct {
 	epWatcher    kubeclient.EndpointsInterface
 	routeWatcher osclient.Interface
-	*sync.Mutex
+	sync.Mutex
 	syncTime     <-chan time.Time
 }
 
