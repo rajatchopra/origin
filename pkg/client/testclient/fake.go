@@ -102,7 +102,7 @@ func (c *Fake) HostSubnets() client.HostSubnetInterface {
 	return &FakeHostSubnet{Fake: c}
 }
 
-// HostSubnets provides a fake REST client for NetNamespaces
+// NetNamespaces provides a fake REST client for NetNamespaces
 func (c *Fake) NetNamespaces() client.NetNamespaceInterface {
 	return &FakeNetNamespace{Fake: c}
 }

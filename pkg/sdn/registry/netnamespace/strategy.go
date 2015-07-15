@@ -37,12 +37,12 @@ func (sdnStrategy) GenerateName(base string) string {
 func (sdnStrategy) PrepareForCreate(obj runtime.Object) {
 }
 
-// Validate validates a new sdn
+// Validate validates a new NetNamespace
 func (sdnStrategy) Validate(ctx kapi.Context, obj runtime.Object) fielderrors.ValidationErrorList {
 	return validation.ValidateNetNamespace(obj.(*api.NetNamespace))
 }
 
-// AllowCreateOnUpdate is false for sdns
+// AllowCreateOnUpdate is false for NetNamespace
 func (sdnStrategy) AllowCreateOnUpdate() bool {
 	return false
 }
