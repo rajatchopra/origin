@@ -387,6 +387,11 @@ func GetBootstrapClusterRoles() []authorizationapi.ClusterRole {
 					Resources: util.NewStringSet("services"),
 				},
 				{
+					// Needed to get namespace<->id mappings for service isolation rules
+					Verbs:     util.NewStringSet("get", "list", "watch"),
+					Resources: util.NewStringSet("namespaces"),
+				},
+				{
 					// Nodes can register themselves
 					// TODO: restrict to creating a node with the same name they announce
 					Verbs:     util.NewStringSet("create", "get", "list", "watch"),

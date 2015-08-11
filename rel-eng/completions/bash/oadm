@@ -423,6 +423,77 @@ _oadm_policy()
     must_have_one_noun=()
 }
 
+_oadm_groups_new()
+{
+    last_command="oadm_groups_new"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+}
+
+_oadm_groups_add-users()
+{
+    last_command="oadm_groups_add-users"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+}
+
+_oadm_groups_remove-users()
+{
+    last_command="oadm_groups_remove-users"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+}
+
+_oadm_groups()
+{
+    last_command="oadm_groups"
+    commands=()
+    commands+=("new")
+    commands+=("add-users")
+    commands+=("remove-users")
+
+    flags=()
+    two_word_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+}
+
 _oadm_router()
 {
     last_command="oadm_router"
@@ -441,6 +512,7 @@ _oadm_router()
     flags+=("--dry-run")
     flags+=("--help")
     flags+=("-h")
+    flags+=("--host-network")
     flags+=("--images=")
     flags+=("--labels=")
     flags+=("--latest-images")
@@ -1200,6 +1272,7 @@ _oadm()
     commands=()
     commands+=("new-project")
     commands+=("policy")
+    commands+=("groups")
     commands+=("router")
     commands+=("ipfailover")
     commands+=("registry")
@@ -1221,7 +1294,6 @@ _oadm()
     flags_with_completion=()
     flags_completion=()
 
-    flags+=("--allow-dynamic-housekeeping")
     flags+=("--alsologtostderr")
     flags+=("--api-version=")
     flags+=("--boot-id-file=")
@@ -1253,7 +1325,6 @@ _oadm()
     flags+=("--logtostderr")
     flags+=("--machine-id-file=")
     flags+=("--match-server-version")
-    flags+=("--max-housekeeping-interval=")
     flags+=("--namespace=")
     two_word_flags+=("-n")
     flags+=("--server=")
