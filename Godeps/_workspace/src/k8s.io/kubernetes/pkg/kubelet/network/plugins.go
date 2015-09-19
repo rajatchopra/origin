@@ -25,6 +25,7 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client"
 	kubeletTypes "k8s.io/kubernetes/pkg/kubelet/types"
+	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/util"
 	"k8s.io/kubernetes/pkg/util/errors"
 )
@@ -72,6 +73,9 @@ type Host interface {
 
 	// GetKubeClient returns a client interface
 	GetKubeClient() client.Interface
+
+	// GetContainerRuntime returns the container runtime that implements the containers (e.g. docker/rkt)
+        GetRuntime() kubecontainer.Runtime
 }
 
 // InitNetworkPlugin inits the plugin that matches networkPluginName. Plugins must have unique names.

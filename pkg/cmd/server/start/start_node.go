@@ -246,6 +246,8 @@ func RunSDNController(config *kubernetes.NodeConfig, nodeConfig configapi.NodeCo
 	}
 
 	switch nodeConfig.NetworkConfig.NetworkPluginName {
+	case "cni":
+		fallthrough
 	case flatsdn.NetworkPluginName():
 		ch := make(chan struct{})
 		config.KubeletConfig.StartUpdates = ch

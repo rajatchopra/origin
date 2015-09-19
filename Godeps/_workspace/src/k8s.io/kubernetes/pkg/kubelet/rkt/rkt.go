@@ -1201,3 +1201,10 @@ func (r *runtime) getImageByName(imageName string) (image, error) {
 	}
 	return image{}, fmt.Errorf("cannot find the image %q", imageName)
 }
+
+func (r *runtime) GetNetNs(containerID string) (string, error) {
+        // TODO: get network namespace
+        err := fmt.Errorf("TODO: GetNetNs method not implemented")
+        return "", err
+}
+

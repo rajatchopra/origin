@@ -79,6 +79,8 @@ type Runtime interface {
 	ContainerCommandRunner
 	// ContainerAttach encapsulates the attaching to containers for testability
 	ContainerAttacher
+	// Get Container NetNamespacePath
+        GetNetNs(containerId string) (string, error)
 }
 
 type ContainerAttacher interface {

@@ -62,6 +62,8 @@ const (
 	// we want to able to consider SRV lookup names like _dns._udp.kube-dns.default.svc to be considered relative.
 	// hence, setting ndots to be 5.
 	ndotsDNSOption = "options ndots:5\n"
+
+	DockerNetnsFmt = "/proc/%v/ns/net"
 )
 
 // DockerManager implements the Runtime interface.
@@ -1702,4 +1704,40 @@ func getUidFromUser(id string) string {
 	}
 	// no gid, just return the id
 	return id
+}
+
+// GetNetNs returns the network namespace path for the given container
+func (dm *DockerManager) GetNetNs(containerID string) (string, error) {
+        inspectResult, err := dm.client.InspectContainer(string(containerID))
+        if err != nil {
+                glog.Errorf("Error inspecting container: '%v'", err)
+                return "", err
+        }
+        netnsPath := fmt.Sprintf(DockerNetnsFmt, inspectResult.State.Pid)
+        return netnsPath, nil
+}
+
+func (dm *DockerManager) GetContainerIP(containerID, interfaceName string) (string, error) {
+        _, lookupErr := exec.LookPath("nsenter")
+        if lookupErr != nil {
+                return "", fmt.Errorf("Unable to obtain IP address of container: missing nsenter.")
+        }
+        container, err := dm.client.InspectContainer(containerID)
+        if err != nil {
+                return "", err
+        }
+
+        if !container.State.Running {
+                return "", fmt.Errorf("container not running (%s)", container.ID)
+        }
+
+        containerPid := container.State.Pid
+	extractIPCmd := fmt.Sprintf("ip -4 addr show %s | grep inet | awk -F\" \" '{print $2}'", interfaceName)
+        args := []string{"-t", fmt.Sprintf("%d", containerPid), "-n", "--", "bash", "-c", extractIPCmd} 
+        command := exec.Command("nsenter", args...)
+        out, err := command.CombinedOutput()
+        if err != nil {
+                return "", err
+        }
+        return string(out), nil
 }

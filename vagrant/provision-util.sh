@@ -102,7 +102,7 @@ os::util::get-network-plugin() {
 
   local subnet_plugin="redhat/openshift-ovs-subnet"
   local multitenant_plugin="redhat/openshift-ovs-multitenant"
-  local default_plugin="${subnet_plugin}"
+  local default_plugin="cni"
 
   if [ "${plugin}" != "${subnet_plugin}" ] && \
      [ "${plugin}" != "${multitenant_plugin}" ]; then
@@ -133,7 +133,9 @@ os::util::install-sdn() {
       # The subnet plugin is discovered via the kube network plugin path.
       local kube_osdn_path="/usr/libexec/kubernetes/kubelet-plugins/net/exec/redhat~openshift-ovs-subnet"
       mkdir -p "${kube_osdn_path}"
+      mkdir -p "/opt/cni/bin"
       cp -f kube/bin/openshift-ovs-subnet "${kube_osdn_path}/"
+      cp -f kube/bin/openshift-ovs-subnet "/opt/cni/bin/"
       cp -f kube/bin/openshift-sdn-kube-subnet-setup.sh /usr/bin/
 
       # The multitenant plugin only needs to be in PATH because the
@@ -141,6 +143,24 @@ os::util::install-sdn() {
       cp -f multitenant/bin/openshift-ovs-multitenant /usr/bin/
       cp -f multitenant/bin/openshift-sdn-multitenant-setup.sh /usr/bin/
 
+      # create a cni plugin too
+      mkdir -p /etc/cni/net.d
+      cat >/etc/cni/net.d/openshift-ovs-subnet.conf <<EOF
+{
+    "name": "openshift-network",
+    "type": "openshift-ovs-subnet",
+    "bridge": "eth0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "subnet": "10.22.0.0/16",
+        "routes": [
+            { "dst": "0.0.0.0/0" }
+        ]
+    }
+}
+EOF
       # subnet and multitenant plugin setup writes docker network options
       # to /run/openshift-sdn/docker-network, make this file to be exported
       # as part of docker service start.
