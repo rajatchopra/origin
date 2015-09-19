@@ -135,7 +135,7 @@ os::util::install-sdn() {
       mkdir -p "${kube_osdn_path}"
       mkdir -p "/opt/cni/bin"
       cp -f kube/bin/openshift-ovs-subnet "${kube_osdn_path}/"
-      cp -f kube/bin/openshift-ovs-subnet "/opt/cni/bin/"
+      cp -f kube/bin/openshift-ovs-cni "/opt/cni/bin/"
       cp -f kube/bin/openshift-sdn-kube-subnet-setup.sh /usr/bin/
 
       # The multitenant plugin only needs to be in PATH because the
@@ -145,10 +145,10 @@ os::util::install-sdn() {
 
       # create a cni plugin too
       mkdir -p /etc/cni/net.d
-      cat >/etc/cni/net.d/openshift-ovs-subnet.conf <<EOF
+      cat >/etc/cni/net.d/openshift-ovs-cni.conf <<EOF
 {
     "name": "openshift-network",
-    "type": "openshift-ovs-subnet",
+    "type": "openshift-ovs-cni",
     "bridge": "eth0",
     "isGateway": true,
     "ipMasq": true,
