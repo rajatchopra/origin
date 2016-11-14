@@ -108,6 +108,18 @@ func NewTemplatePlugin(cfg TemplatePluginConfig, lookupSvc ServiceLookup) (*Temp
 		"matchPattern":      matchPattern,      //anchors provided regular expression and evaluates against given string
 		"isInteger":         isInteger,         //determines if a given variable is an integer
 		"matchValues":       matchValues,       //compares a given string to a list of allowed strings
+		"add": func(i, j int) int {
+			return (i + j)
+		}, //adds two integers
+		"subtract": func(i, j int) int {
+			return (i - j)
+		}, //subtracts two integers
+		"multiply": func(i, j int) int {
+			return (i * j)
+		}, //multiplies two integers
+		"divide": func(i, j int) int {
+			return (i / j)
+		}, //divides two integers
 
 		"genSubdomainWildcardRegexp": genSubdomainWildcardRegexp, //generates a regular expression matching the subdomain for hosts (and paths) with a wildcard policy
 	}
