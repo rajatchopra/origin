@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"reflect"
 	"text/template"
 	"time"
 
@@ -99,6 +100,15 @@ func env(name, defaultValue string) string {
 	return defaultValue
 }
 
+func getInteger(x interface{}) int {
+	ref := reflect.ValueOf(x)
+	value, err := strconv.Atoi(ref.String())
+	if err != nil {
+		value = 0
+	}
+	return value
+}
+
 // NewTemplatePlugin creates a new TemplatePlugin.
 func NewTemplatePlugin(cfg TemplatePluginConfig, lookupSvc ServiceLookup) (*TemplatePlugin, error) {
 	templateBaseName := filepath.Base(cfg.TemplatePath)
@@ -108,17 +118,21 @@ func NewTemplatePlugin(cfg TemplatePluginConfig, lookupSvc ServiceLookup) (*Temp
 		"matchPattern":      matchPattern,      //anchors provided regular expression and evaluates against given string
 		"isInteger":         isInteger,         //determines if a given variable is an integer
 		"matchValues":       matchValues,       //compares a given string to a list of allowed strings
-		"add": func(i, j int) int {
-			return (i + j)
+		"add": func(i, j interface{}) int {
+			return (getInteger(i) + getInteger(j))
 		}, //adds two integers
-		"subtract": func(i, j int) int {
-			return (i - j)
+		"subtract": func(i, j interface{}) int {
+			return (getInteger(i) - getInteger(j))
 		}, //subtracts two integers
-		"multiply": func(i, j int) int {
-			return (i * j)
+		"multiply": func(i, j interface{}) int {
+			return (getInteger(i) * getInteger(j))
 		}, //multiplies two integers
-		"divide": func(i, j int) int {
-			return (i / j)
+		"divide": func(i, j interface{}) int {
+			z := getInteger(j)
+			if z == 0 {
+				return 0
+			}
+			return (getInteger(i) / getInteger(j))
 		}, //divides two integers
 
 		"genSubdomainWildcardRegexp": genSubdomainWildcardRegexp, //generates a regular expression matching the subdomain for hosts (and paths) with a wildcard policy

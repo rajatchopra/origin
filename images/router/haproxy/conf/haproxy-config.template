@@ -361,7 +361,9 @@ backend be_edge_http_{{$cfgIdx}}
     {{ range $serviceUnitName, $weight := $cfg.ServiceUnitNames }}
       {{ if ne $weight 0 }}
       {{ with $replicas := len $.ServiceUnits }}
+      ## replicas : {{ $replicas }} weight : {{ $weight }}
       {{ with $serverwt := divide $weight $replicas }}
+      ## serverwt : {{ $serverwt }}
         {{ with $serviceUnit := index $.ServiceUnits $serviceUnitName }}
           {{ range $idx, $endpoint := endpointsForAlias $cfg $serviceUnit }}
             {{ if $endpoint.NoHealthCheck }}
@@ -429,27 +431,29 @@ backend be_tcp_{{$cfgIdx}}
     {{ range $serviceUnitName, $weight := $cfg.ServiceUnitNames }}
       {{ if ne $weight 0 }}
       {{ with $replicas := len $.ServiceUnits }}
+      {{ with $serverwt := divide $weight $replicas }}
         {{ with $serviceUnit := index $.ServiceUnits $serviceUnitName }}
           {{ range $idx, $endpoint := endpointsForAlias $cfg $serviceUnit }}
             {{ if $endpoint.NoHealthCheck }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} weight {{$serverwt}}
             {{ else }}
               {{ with $healthIntv := index $cfg.Annotations "router.openshift.io/haproxy.health.check.interval" }}
                 {{ if (matchPattern "[1-9][0-9]*(us|ms|s|m|h|d)?" $healthIntv) }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter {{$healthIntv}} weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter {{$healthIntv}} weight {{$serverwt}}
                 {{ else }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter 5000ms weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter 5000ms weight {{$serverwt}}
                 {{ end }}
               {{ else }}
                 {{ if (matchPattern "[1-9][0-9]*(us|ms|s|m|h|d)?" (env "ROUTER_BACKEND_CHECK_INTERVAL" "")) }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter {{env "ROUTER_BACKEND_CHECK_INTERVAL" "5000ms"}} weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter {{env "ROUTER_BACKEND_CHECK_INTERVAL" "5000ms"}} weight {{$serverwt}}
                 {{ else }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter 5000ms weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} check inter 5000ms weight {{$serverwt}}
                 {{ end }}
               {{ end }}
             {{ end }}
           {{ end }}{{/* end range endpointsForAlias */}}
         {{ end }}{{/* end get ServiceUnit from serviceUnitName */}}
+      {{ end }}{{/* with serverwt */}}
       {{ end }}{{/* with replicas */}}
       {{ end }}{{/* end if weight != 0 */}}
     {{ end }}{{/* end iterate over services*/}}
@@ -505,27 +509,29 @@ backend be_secure_{{$cfgIdx}}
     {{ range $serviceUnitName, $weight := $cfg.ServiceUnitNames }}
       {{ if ne $weight 0 }}
       {{ with $replicas := len $.ServiceUnits }}
+      {{ with $serverwt := divide $weight $replicas }}
         {{ with $serviceUnit := index $.ServiceUnits $serviceUnitName }}
           {{ range $idx, $endpoint := endpointsForAlias $cfg $serviceUnit }}
             {{ if $endpoint.NoHealthCheck }}
-  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl verify required ca-file {{ $workingDir }}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{divide $weight $replicas}}
+  server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl verify required ca-file {{ $workingDir }}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{$serverwt}}
             {{ else }}
               {{ with $healthIntv := index $cfg.Annotations "router.openshift.io/haproxy.health.check.interval" }}
                 {{ if (matchPattern "[1-9][0-9]*(us|ms|s|m|h|d)?" $healthIntv) }}
-    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter {{$healthIntv}} verify required ca-file {{ $workingDir }}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{divide $weight $replicas}}
+    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter {{$healthIntv}} verify required ca-file {{ $workingDir }}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{$serverwt}}
                 {{ else }}
-    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter 5000ms verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{divide $weight $replicas}}
+    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter 5000ms verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{$serverwt}}
                 {{ end }}
               {{ else }}
                 {{ if (matchPattern "[1-9][0-9]*(us|ms|s|m|h|d)?" (env "ROUTER_BACKEND_CHECK_INTERVAL" "")) }}
-    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter {{env "ROUTER_BACKEND_CHECK_INTERVAL" "5000ms"}} verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{divide $weight $replicas}}
+    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter {{env "ROUTER_BACKEND_CHECK_INTERVAL" "5000ms"}} verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{$serverwt}}
                 {{ else }}
-    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter 5000ms verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{divide $weight $replicas}}
+    server {{$endpoint.IdHash}} {{$endpoint.IP}}:{{$endpoint.Port}} ssl check inter 5000ms verify required ca-file {{$workingDir}}/cacerts/{{$cfgIdx}}.pem cookie {{$endpoint.IdHash}} weight {{$serverwt}}
                 {{ end }}
               {{ end }}{{/* end get health interval annotation */}}
             {{ end }}{{/* end else no health check */}}
           {{ end }}{{/* end range endpointsForAlias */}}
         {{ end }}{{/* end get serviceUnit from its name */}}
+      {{ end }}{{/* with serverwt */}}
       {{ end }}{{/* with replicas */}}
       {{ end }}{{/* end if weight != 0 */}}
     {{ end }}{{/* end range over serviceUnitNames */}}
